@@ -3,7 +3,10 @@ import Sidebar from './components/Sidebar';
 import Navbar from './components/Navbar';
 import Dashboard from './pages/Dashboard.jsx';
 import Login from './pages/Login.jsx';
+<<<<<<< HEAD
 import { } from './pages/firebase.js';
+=======
+>>>>>>> daa9205f1c50887809fedad162c132985043e8c9
 
 // Import newly developed modules
 import MyCourses from './pages/MyCourses.jsx';
