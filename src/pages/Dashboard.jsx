@@ -1,9 +1,23 @@
 import React from 'react';
 import { BookOpen, CheckCircle, Clipboard, Clock } from 'lucide-react';
 
-export default function Dashboard({ userName, courses, lessonsCompleted, testsTaken, studyTime, onProgressChange }) {
+export default function Dashboard({ 
+  userName, 
+  courses, 
+  lessonsCompleted, 
+  testsTaken, 
+  studyTime, 
+  onProgressChange,
+  onContinueLearning 
+}) {
+  
+  // Find the course with the lowest progress that is still active to continue learning
+  const activeCourse = [...courses]
+    .sort((a, b) => a.progress - b.progress)
+    .find(c => c.progress > 0 && c.progress < 100) || courses[0];
+
   return (
-    <div className="max-w-6xl mx-auto space-y-8">
+    <div className="max-w-6xl mx-auto space-y-8 select-none">
       {/* Welcome Header */}
       <div>
         <h1 className="text-2xl font-bold tracking-tight text-slate-900 flex items-center gap-2">
@@ -14,7 +28,7 @@ export default function Dashboard({ userName, courses, lessonsCompleted, testsTa
 
       {/* Top Overview Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
-        <div className="bg-white p-5 rounded-2xl border border-slate-100 flex items-start gap-4 shadow-sm">
+        <div className="bg-white p-5 rounded-2xl border border-slate-100 flex items-start gap-4 shadow-sm hover:shadow-md transition-all">
           <div className="p-3 bg-blue-50 text-blue-600 rounded-xl"><BookOpen size={20} /></div>
           <div>
             <p className="text-xs font-medium text-slate-400">Courses Enrolled</p>
@@ -22,7 +36,7 @@ export default function Dashboard({ userName, courses, lessonsCompleted, testsTa
           </div>
         </div>
 
-        <div className="bg-white p-5 rounded-2xl border border-slate-100 flex items-start gap-4 shadow-sm">
+        <div className="bg-white p-5 rounded-2xl border border-slate-100 flex items-start gap-4 shadow-sm hover:shadow-md transition-all">
           <div className="p-3 bg-emerald-50 text-emerald-600 rounded-xl"><CheckCircle size={20} /></div>
           <div>
             <p className="text-xs font-medium text-slate-400">Lessons Completed</p>
@@ -30,7 +44,7 @@ export default function Dashboard({ userName, courses, lessonsCompleted, testsTa
           </div>
         </div>
 
-        <div className="bg-white p-5 rounded-2xl border border-slate-100 flex items-start gap-4 shadow-sm">
+        <div className="bg-white p-5 rounded-2xl border border-slate-100 flex items-start gap-4 shadow-sm hover:shadow-md transition-all">
           <div className="p-3 bg-purple-50 text-purple-600 rounded-xl"><Clipboard size={20} /></div>
           <div>
             <p className="text-xs font-medium text-slate-400">Tests Taken</p>
@@ -38,7 +52,7 @@ export default function Dashboard({ userName, courses, lessonsCompleted, testsTa
           </div>
         </div>
 
-        <div className="bg-white p-5 rounded-2xl border border-slate-100 flex items-start gap-4 shadow-sm">
+        <div className="bg-white p-5 rounded-2xl border border-slate-100 flex items-start gap-4 shadow-sm hover:shadow-md transition-all">
           <div className="p-3 bg-orange-50 text-orange-600 rounded-xl"><Clock size={20} /></div>
           <div>
             <p className="text-xs font-medium text-slate-400">Study Time</p>
@@ -55,7 +69,6 @@ export default function Dashboard({ userName, courses, lessonsCompleted, testsTa
           <div>
             <div className="flex justify-between items-center mb-6">
               <h2 className="font-bold text-slate-800">My Courses</h2>
-              <button className="text-xs text-blue-600 font-semibold hover:underline">View all</button>
             </div>
 
             <div className="space-y-5">
@@ -82,13 +95,20 @@ export default function Dashboard({ userName, courses, lessonsCompleted, testsTa
           <div>
             <h2 className="font-bold text-slate-800 mb-4">Continue Learning</h2>
             <div className="bg-blue-50/70 aspect-[16/10] rounded-xl flex items-center justify-center border border-blue-100/50 mb-4 relative overflow-hidden group">
-              <div className="absolute inset-0 bg-gradient-to-tr from-blue-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div className="absolute inset-0 bg-gradient-to-tr from-blue-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
               <BookOpen size={40} className="text-blue-300 stroke-[1.5]" />
             </div>
-            <h3 className="font-bold text-slate-800 text-sm">{courses[0]?.nextLesson || "Algebra Basics"}</h3>
-            <p className="text-xs text-slate-400 mt-0.5">{courses[0]?.name || "Mathematics"}</p>
+            <h3 className="font-bold text-slate-800 text-sm">
+              {activeCourse ? `${activeCourse.name} Overview` : "Algebra Basics"}
+            </h3>
+            <p className="text-xs text-slate-400 mt-0.5">
+              {activeCourse ? `${activeCourse.category} Track` : "Mathematics"}
+            </p>
           </div>
-          <button className="w-full mt-6 bg-blue-600 hover:bg-blue-700 text-white font-medium text-xs py-3 px-4 rounded-xl shadow-md shadow-blue-600/10 transition-all active:scale-[0.98]">
+          <button 
+            onClick={onContinueLearning}
+            className="w-full mt-6 bg-blue-600 hover:bg-blue-700 text-white font-medium text-xs py-3 px-4 rounded-xl shadow-md shadow-blue-600/10 transition-all active:scale-[0.98] cursor-pointer"
+          >
             Continue Lesson
           </button>
         </div>

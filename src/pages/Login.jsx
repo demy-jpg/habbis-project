@@ -36,6 +36,9 @@ export default function Login({ onLogin }) {
                   className="appearance-none block w-full px-3 py-2 border border-slate-300 rounded-xl shadow-sm placeholder-slate-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 />
               </div>
+              <p className="mt-2 text-xs text-slate-400 font-medium">
+                🔑 Note: No password or email is required. Only your Student Name is needed to sign in.
+              </p>
             </div>
 
             <div>
