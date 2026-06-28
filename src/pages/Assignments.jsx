@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Calendar, FileText, CheckCircle2, Upload, X } from 'lucide-react';
+import { Calendar, FileText, CheckCircle2, Upload, X, Clock } from 'lucide-react';
 
 export default function Assignments({ assignments, onUpdateAssignment }) {
   const [activeTask, setActiveTask] = useState(null);
@@ -24,9 +24,9 @@ export default function Assignments({ assignments, onUpdateAssignment }) {
     // Simulate submission delay
     setTimeout(() => {
       onUpdateAssignment(activeTask.id, {
-        status: 'Graded (A+)',
-        due: 'Completed',
-        type: 'done'
+        status: 'Submitted (Pending Grade)',
+        due: 'Submitted',
+        type: 'pending'
       });
       setIsSubmitting(false);
       setActiveTask(null);
@@ -34,7 +34,7 @@ export default function Assignments({ assignments, onUpdateAssignment }) {
   };
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6 relative select-none">
+    <div className="max-w-6xl mx-auto space-y-6 relative">
       <div>
         <h1 className="text-2xl font-bold text-slate-900">Assignments Workspace</h1>
         <p className="text-sm text-slate-500">Track task assignment timelines and review instructor grades.</p>
@@ -50,7 +50,9 @@ export default function Assignments({ assignments, onUpdateAssignment }) {
                     ? 'bg-red-50 text-red-600' 
                     : task.type === 'done' 
                       ? 'bg-emerald-50 text-emerald-600' 
-                      : 'bg-blue-50 text-blue-600'
+                      : task.type === 'pending'
+                        ? 'bg-amber-50 text-amber-600'
+                        : 'bg-blue-50 text-blue-600'
                 }`}>
                   <FileText size={20} />
                 </div>
@@ -60,27 +62,33 @@ export default function Assignments({ assignments, onUpdateAssignment }) {
                 </div>
               </div>
 
-              <div className="flex items-center gap-6 w-full sm:w-auto justify-between sm:justify-end text-xs font-medium">
+              <div className="flex flex-wrap items-center gap-3 sm:gap-6 w-full sm:w-auto justify-between sm:justify-end text-xs font-medium">
                 <span className="flex items-center gap-1.5 text-slate-500"><Calendar size={14} /> {task.due}</span>
                 <span className={`px-3 py-1 rounded-full font-semibold ${
                   task.type === 'urgent' 
                     ? 'bg-red-100 text-red-700' 
                     : task.type === 'done' 
                       ? 'bg-emerald-100 text-emerald-700' 
-                      : 'bg-blue-100 text-blue-700'
+                      : task.type === 'pending'
+                        ? 'bg-amber-100 text-amber-700'
+                        : 'bg-blue-100 text-blue-700'
                 }`}>{task.status}</span>
                 
-                {task.type !== 'done' ? (
+                {task.type === 'done' ? (
+                  <div className="flex items-center gap-1 text-emerald-600 font-bold px-3 py-2 bg-emerald-50 rounded-xl">
+                    <CheckCircle2 size={14} /> Completed
+                  </div>
+                ) : task.type === 'pending' ? (
+                  <div className="flex items-center gap-1 text-amber-600 font-bold px-3 py-2 bg-amber-50 rounded-xl">
+                    <Clock size={14} /> Pending Grade
+                  </div>
+                ) : (
                   <button 
                     onClick={() => handleOpenSubmit(task)}
                     className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition-all shadow-sm shadow-blue-500/5 cursor-pointer"
                   >
                     Submit Assignment
                   </button>
-                ) : (
-                  <div className="flex items-center gap-1 text-emerald-600 font-bold px-3 py-2 bg-emerald-50 rounded-xl">
-                    <CheckCircle2 size={14} /> Completed
-                  </div>
                 )}
               </div>
             </div>

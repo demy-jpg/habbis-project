@@ -1,12 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Sidebar from './components/Sidebar';
 import Navbar from './components/Navbar';
 import Dashboard from './pages/Dashboard.jsx';
 import Login from './pages/Login.jsx';
-<<<<<<< HEAD
-import { } from './pages/firebase.js';
-=======
->>>>>>> daa9205f1c50887809fedad162c132985043e8c9
+import { auth } from './pages/firebase.js';
+import { onAuthStateChanged, signOut, updateProfile } from 'firebase/auth';
 
 // Import newly developed modules
 import MyCourses from './pages/MyCourses.jsx';
@@ -16,10 +14,13 @@ import Tests from './pages/Tests.jsx';
 import Certificates from './pages/Certificates.jsx';
 import Payments from './pages/Payments.jsx';
 import Settings from './pages/Settings.jsx';
+import TutorDashboard from './pages/TutorDashboard.jsx';
 
 export default function App() {
-  const [user, setUser] = useState({ name: 'Treasure', isLoggedIn: true });
+  const [user, setUser] = useState({ name: '', role: 'student', isLoggedIn: false });
   const [activePage, setActivePage] = useState('Dashboard');
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [selectedCourseId, setSelectedCourseId] = useState('math');
   const [courses, setCourses] = useState([
     { id: 'math', name: 'Mathematics', progress: 70, category: 'Science', lessons: 12 },
     { id: 'science', name: 'Science', progress: 50, category: 'Science', lessons: 10 },
@@ -104,6 +105,51 @@ export default function App() {
     }
   });
 
+  const [authLoading, setAuthLoading] = useState(true);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      if (firebaseUser) {
+        const emailKey = firebaseUser.email ? firebaseUser.email.toLowerCase().trim() : '';
+        const savedRole = localStorage.getItem(`role_${firebaseUser.uid}`) || 
+                          (emailKey ? localStorage.getItem(`user_role_${emailKey}`) : null) || 
+                          'student';
+        
+        localStorage.setItem(`role_${firebaseUser.uid}`, savedRole);
+        if (emailKey) {
+          localStorage.setItem(`user_role_${emailKey}`, savedRole);
+        }
+
+        setUser({
+          name: firebaseUser.displayName || firebaseUser.email.split('@')[0],
+          role: savedRole,
+          isLoggedIn: true
+        });
+      } else {
+        setUser({
+          name: '',
+          role: 'student',
+          isLoggedIn: false
+        });
+      }
+      setAuthLoading(false);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  const handleSwitchProfile = async (newName) => {
+    if (auth.currentUser) {
+      try {
+        await updateProfile(auth.currentUser, { displayName: newName });
+        setUser(prev => ({ ...prev, name: newName }));
+      } catch (err) {
+        console.error("Error updating profile display name:", err);
+      }
+    } else {
+      setUser(prev => ({ ...prev, name: newName }));
+    }
+  };
+
   const handleProgressChange = (id, newProgress) => {
     setCourses(prev => prev.map(c => c.id === id ? { ...c, progress: Math.min(100, Math.max(0, Number(newProgress))) } : c));
   };
@@ -115,6 +161,39 @@ export default function App() {
   const handleAddInvoice = (newInvoice) => {
     setInvoices(prev => [newInvoice, ...prev]);
   };
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+    } catch (err) {
+      console.error("Sign out error:", err);
+    }
+  };
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <div className="animate-spin rounded-full h-10 w-10 border-4 border-blue-600 border-t-transparent"></div>
+          <p className="text-sm font-semibold text-slate-500">Loading Learnify...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user.isLoggedIn) {
+    return (
+      <Login 
+        onLogin={(name, role) => {
+          if (auth.currentUser) {
+            localStorage.setItem(`role_${auth.currentUser.uid}`, role);
+          }
+          setUser({ name, role, isLoggedIn: true });
+          setActivePage(role === 'tutor' ? 'Tutor Dashboard' : 'Dashboard');
+        }} 
+      />
+    );
+  }
 
   // Multi-page navigation router switch
   const renderPage = () => {
@@ -128,13 +207,39 @@ export default function App() {
             testsTaken={testsTaken}
             studyTime={studyTime}
             onProgressChange={handleProgressChange}
-            onContinueLearning={() => setActivePage('Lessons')}
+            onContinueLearning={(id) => {
+              setSelectedCourseId(id);
+              setActivePage('Lessons');
+            }}
+          />
+        );
+      case 'Tutor Dashboard':
+        return (
+          <TutorDashboard 
+            courses={courses} 
+            setCourses={setCourses} 
+            assignments={assignments} 
+            onUpdateAssignment={handleUpdateAssignment} 
+            onProgressChange={handleProgressChange}
           />
         );
       case 'My Courses':
-        return <MyCourses courses={courses} />;
+        return (
+          <MyCourses 
+            courses={courses} 
+            onResumeCourse={(id) => {
+              setSelectedCourseId(id);
+              setActivePage('Lessons');
+            }} 
+          />
+        );
       case 'Lessons':
-        return <Lessons courses={courses} />;
+        return (
+          <Lessons 
+            course={courses.find(c => c.id === selectedCourseId) || courses[0]} 
+            onProgressChange={handleProgressChange} 
+          />
+        );
       case 'Assignments':
         return (
           <Assignments 
@@ -143,7 +248,13 @@ export default function App() {
           />
         );
       case 'Tests':
-        return <Tests tests={tests} setTests={setTests} />;
+        return (
+          <Tests 
+            tests={tests} 
+            setTests={setTests} 
+            onProgressChange={handleProgressChange} 
+          />
+        );
       case 'Certificates':
         return <Certificates certs={earnedCertificates} userName={user.name} />;
       case 'Payments':
@@ -173,11 +284,33 @@ export default function App() {
   };
 
   return (
-    <div className="flex h-screen bg-[#f8fafc] text-slate-800 font-sans">
-      <Sidebar activePage={activePage} setActivePage={setActivePage} onLogout={() => setUser({ name: 'Guest', isLoggedIn: true })} />
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <Navbar userName={user.name} onSwitchProfile={(name) => setUser({ name, isLoggedIn: true })} />
-        <main className="flex-1 overflow-y-auto p-8">{renderPage()}</main>
+    <div className="flex h-screen bg-[#f8fafc] text-slate-800 font-sans relative overflow-hidden">
+      <Sidebar 
+        activePage={activePage} 
+        setActivePage={(page) => {
+          setActivePage(page);
+          setIsSidebarOpen(false);
+        }} 
+        userRole={user.role}
+        onLogout={handleLogout} 
+        isOpen={isSidebarOpen}
+        onClose={() => setIsSidebarOpen(false)}
+      />
+      {isSidebarOpen && (
+        <div 
+          onClick={() => setIsSidebarOpen(false)}
+          className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-40 md:hidden transition-opacity"
+        />
+      )}
+      <div className="flex-1 flex flex-col overflow-hidden w-full">
+        <Navbar 
+          userName={user.name} 
+          userRole={user.role} 
+          onSwitchProfile={handleSwitchProfile} 
+          onLogout={handleLogout} 
+          onOpenSidebar={() => setIsSidebarOpen(true)}
+        />
+        <main className="flex-1 overflow-y-auto p-4 md:p-8">{renderPage()}</main>
       </div>
     </div>
   );

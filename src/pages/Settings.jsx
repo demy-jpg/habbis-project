@@ -1,12 +1,21 @@
 import React, { useState } from 'react';
 import { User, Bell, Shield } from 'lucide-react';
+import { updateProfile } from 'firebase/auth';
+import { auth } from './firebase.js';
 
 export default function Settings({ user, setUser }) {
   const [nameField, setNameField] = useState(user.name);
   const [saved, setSaved] = useState(false);
 
-  const handleSave = (e) => {
+  const handleSave = async (e) => {
     e.preventDefault();
+    if (auth.currentUser) {
+      try {
+        await updateProfile(auth.currentUser, { displayName: nameField });
+      } catch (err) {
+        console.error("Error updating Firebase Auth display name:", err);
+      }
+    }
     setUser({ ...user, name: nameField });
     setSaved(true);
     setTimeout(() => setSaved(false), 3000);

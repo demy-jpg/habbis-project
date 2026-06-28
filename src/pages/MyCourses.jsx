@@ -1,7 +1,7 @@
 import React from 'react';
 import { BookOpen, Folder, PlayCircle } from 'lucide-react';
 
-function MyCourses({ courses }) {
+function MyCourses({ courses, onResumeCourse }) {
   return (
     <div className="max-w-6xl mx-auto space-y-6">
       <div>
@@ -29,7 +29,10 @@ function MyCourses({ courses }) {
               </div>
               <div className="flex justify-between items-center text-xs text-slate-500 pt-2">
                 <span className="flex items-center gap-1"><BookOpen size={14} /> {course.lessons} Lectures</span>
-                <button className="flex items-center gap-1 text-blue-600 font-semibold hover:text-blue-700">
+                <button 
+                  onClick={() => onResumeCourse(course.id)}
+                  className="flex items-center gap-1 text-blue-600 font-semibold hover:text-blue-700 cursor-pointer"
+                >
                   <PlayCircle size={16} /> Resume
                 </button>
               </div>

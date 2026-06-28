@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { HelpCircle, Clock, Award, Check, X } from 'lucide-react';
 
-export default function Tests({ tests, setTests }) {
+export default function Tests({ tests, setTests, onProgressChange }) {
   const [activeQuiz, setActiveQuiz] = useState(null);
   const [answers, setAnswers] = useState({});
   const [submittedScore, setSubmittedScore] = useState(null);
@@ -29,10 +29,25 @@ export default function Tests({ tests, setTests }) {
       }
     });
 
-    const scorePct = Math.round((correctCount / activeQuiz.questions.length) * 100) + '%';
+    const scorePctNum = Math.round((correctCount / activeQuiz.questions.length) * 100);
+    const scorePct = scorePctNum + '%';
     
     setTests(prev => prev.map(t => t.id === activeQuiz.id ? { ...t, score: scorePct } : t));
     setSubmittedScore(scorePct);
+
+    if (onProgressChange) {
+      const subjectMap = {
+        'Mathematics': 'math',
+        'Biology': 'biology',
+        'Physics': 'physics',
+        'Science': 'science',
+        'English': 'english'
+      };
+      const courseId = subjectMap[activeQuiz.subject];
+      if (courseId) {
+        onProgressChange(courseId, scorePctNum);
+      }
+    }
   };
 
   const handleClose = () => {
@@ -42,7 +57,7 @@ export default function Tests({ tests, setTests }) {
   };
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6 relative select-none">
+    <div className="max-w-6xl mx-auto space-y-6 relative">
       <div>
         <h1 className="text-2xl font-bold text-slate-900">Examination Platform</h1>
         <p className="text-sm text-slate-500">Take test assessments and look over your certified scorecards.</p>

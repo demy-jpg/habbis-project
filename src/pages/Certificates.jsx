@@ -72,7 +72,7 @@ export default function Certificates({ certs, userName }) {
             </button>
 
             {/* Certificate Template Card */}
-            <div className="border-[12px] border-double border-slate-800 rounded-xl p-8 bg-amber-50/20 flex flex-col justify-between items-center text-center relative overflow-hidden font-serif min-h-[420px] print:border-8">
+            <div className="border-8 md:border-[12px] border-double border-slate-800 rounded-xl p-4 md:p-8 bg-amber-50/20 flex flex-col justify-between items-center text-center relative overflow-hidden font-serif min-h-[420px] print:border-8">
               {/* Corner Accents */}
               <div className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 border-slate-800" />
               <div className="absolute top-0 right-0 w-8 h-8 border-t-2 border-r-2 border-slate-800" />

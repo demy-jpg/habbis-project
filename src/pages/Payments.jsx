@@ -63,7 +63,7 @@ export default function Payments({ invoices, onAddInvoice, isPremium, onTogglePr
   };
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6 relative select-none">
+    <div className="max-w-6xl mx-auto space-y-6 relative">
       <div>
         <h1 className="text-2xl font-bold text-slate-900">Billing & Payment Invoices</h1>
         <p className="text-sm text-slate-500">Access billing methods, past transaction logs, and receipts.</p>
