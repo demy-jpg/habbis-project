@@ -12,10 +12,9 @@
   "dependencies": {
     "@heroicons/react": "^2.2.0",
     "@tailwindcss/vite": "^4.3.0",
-<<<<<<< HEAD
+
     "firebase": "^12.15.0",
-=======
->>>>>>> daa9205f1c50887809fedad162c132985043e8c9
+
     "lucide-react": "^1.18.0",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
